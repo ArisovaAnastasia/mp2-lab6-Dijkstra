@@ -24,7 +24,7 @@ class RBTree {
 	};
 
 	Pred cmp; // компаратор для сравнения элементов отношением '<'
-	Node *nil = new Node(Value(), Black); // "Фиктивная" листовая вершина
+	Node *nil = new Node(Value(), Black); // "Фиктивная" листовая вершина и корень дерева
 	Node *root;
 	size_t _size = 0;
 
