@@ -7,8 +7,8 @@ class AVLTree {
 
 	struct Node {
 		Node *left, 
-			*right,
-			*parent;
+		     *right,
+		     *parent;
 		Value data;
 		int8_t bf;
 
