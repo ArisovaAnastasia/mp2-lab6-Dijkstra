@@ -14,7 +14,7 @@ TEST(RBTree, range_constuctor_is_correct) {
 	vector<int> vec(size);
 
 	for (size_t round = 0; round < 10; ++round) {
-		iota(vec.begin(), vec.end(), 1); // ñëó÷àéíàÿ ïåðåñòàíîâêà ÷èñåë {1, 2, ... , size}
+		iota(vec.begin(), vec.end(), 1); // ÑÐ»ÑƒÑ‡Ð°Ð¹Ð½Ð°Ñ Ð¿ÐµÑ€ÐµÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ñ‡Ð¸ÑÐµÐ» {1, 2, ... , size}
 
 		ASSERT_NO_THROW(
 			RBTree<int> rb_tree(vec.begin(), vec.end());
