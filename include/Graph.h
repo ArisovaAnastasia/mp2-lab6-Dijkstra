@@ -51,7 +51,7 @@ public:
 		min_cost[start_v] = 0;
 		prev[start_v] = -1;
 
-		// Выполнение алгоритма
+		// Р’С‹РїРѕР»РЅРµРЅРёРµ Р°Р»РіРѕСЂРёС‚РјР°
 		std::pair<cost_type, vertex_type> curr; 
 		if (mode == HEAP) {
 			DHeap<std::pair<cost_type, vertex_type>, 2> queue;
@@ -116,7 +116,7 @@ public:
 		else
 			throw "Incorrect code for priority queue data structure";
 
-		// Запись всех кратчайших путей и их стоимостей в класс PathInfo
+		// Р—Р°РїРёСЃСЊ РІСЃРµС… РєСЂР°С‚С‡Р°Р№С€РёС… РїСѓС‚РµР№ Рё РёС… СЃС‚РѕРёРјРѕСЃС‚РµР№ РІ РєР»Р°СЃСЃ PathInfo
 		PathInfo result(adj_list.size());
 		for (size_t i = 0; i < adj_list.size(); ++i) {
 			result.paths.push_back({min_cost[i], std::vector<vertex_type>()});
