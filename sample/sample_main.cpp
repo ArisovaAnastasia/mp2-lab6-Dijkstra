@@ -53,7 +53,7 @@ AdjList generate_random_graph(size_t num_vertices, size_t num_edges, int max_cos
 	for (int i = 0; i < num_edges; ++i) {
 		// Ребро корректно, если вершины не совпадают и такое ребро ещё не существует
 		while (!(v1 != v2 && edge_hash.find(v1*num_vertices + v2) == edge_hash.end()
-						&& edge_hash.find(v2*num_vertices + v1) == edge_hash.end())) {
+				  && edge_hash.find(v2*num_vertices + v1) == edge_hash.end())) {
 			v1 = rand_vertex(gen);
 			v2 = rand_vertex(gen);
 		}
