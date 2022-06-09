@@ -7,8 +7,8 @@ class AVLTree {
 
 	struct Node {
 		Node *left, 
-		     *right,
-		     *parent;
+			 *right,
+			 *parent;
 		Value data;
 		int8_t bf;
 
@@ -17,11 +17,12 @@ class AVLTree {
 			data(value), left(left), right(right), parent(parent), bf(0) {}
 	};
 
-	Pred cmp; // объект для сравнения данных на '<'
+	// vvv Поля класса vvv
 	Node *root = nullptr;
-	Node *head = new Node(Value());
+	Node *head = new Node();
 	size_t _size = 0;
-	
+	Pred cmp; // компаратор для сравнения элементов отношением '<'
+	// ^^^ Поля класса ^^^
 
 public:
 
@@ -135,11 +136,13 @@ public:
 	iterator begin() const {
 		Node *curr = root,
 			 *prev = head;
-		while (curr->left != nullptr) {
-			prev = curr;
-			curr = curr->left;
-		}
 
+		if (curr != nullptr) {
+			while (curr->left != nullptr) {
+				prev = curr;
+				curr = curr->left;
+			}
+		}
 		return iterator(head, prev, curr);
 	}
 
@@ -156,23 +159,23 @@ public:
 	AVLTree(const Iterator &first, const Iterator &last, const Pred &cmp = Pred()): cmp(cmp) {
 		for (auto it = first; it != last; ++it) {
 			insert(*it);
-			++_size;
 		}
 	}
 
 	AVLTree(const AVLTree &copy): _size(copy._size), cmp(copy.cmp) {
-		_copy_tree(head, copy.head);
+		_copy_tree(copy.head, head);
 		root = head->left;
 	}
 
 	AVLTree(AVLTree &&mov): _size(mov._size), cmp(std::move(mov.cmp)) {
 		root = head->left = mov.head->left;
 		head->left->parent = head;
-		mov.head->left = nullptr;
+		mov.root = mov.head->left = nullptr;
 	}
 
 	~AVLTree() {
 		clear();
+		delete head;
 	}
 
 	AVLTree& operator=(const AVLTree &copy) {
@@ -182,7 +185,7 @@ public:
 
 			if (root != nullptr)
 				_delete_tree(root);
-			_copy_tree(head, copy.head);
+			_copy_tree(copy.head, head);
 			root = head->left;
 		}
 		return *this;
@@ -195,7 +198,7 @@ public:
 		root = head->left = mov.head->left;
 		head->left->parent = head;
 		if (head != mov.head)
-			mov.head->left = nullptr;
+			mov.root = mov.head->left = nullptr;
 
 		return *this;
 	}
@@ -203,8 +206,10 @@ public:
 	size_t size() { return _size; }
 	bool empty() { return _size == 0; }
 	void clear() {
-		if (root != nullptr)
+		if (root != nullptr) {
 			_delete_tree(root);
+			head->left = root = nullptr;
+		}
 		_size = 0;
 	}
 

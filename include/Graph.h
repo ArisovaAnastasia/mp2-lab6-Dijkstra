@@ -19,30 +19,28 @@ public:
 		friend class Graph;
 	private:
 		std::vector<std::pair<cost_type, std::vector<vertex_type>>> paths; // minimal cost + path
-		PathInfo(size_t size): paths(size) {}
 	public:
-		cost_type get_cost(vertex_type i) { paths[i].first; }
+		PathInfo() {}
+		cost_type get_cost(vertex_type i) { return paths[i].first; }
 		std::vector<vertex_type> get_path(vertex_type i) { return paths[i].second; }
 	};
 
 	Graph(const AdjList &copy = AdjList()): adj_list(copy) {
-		std::vector<bool> was(adj_list.size());
-		was[0] = true;
-
-		for (size_t i = 0; i < adj_list.size(); ++i) {
+		for (size_t i = 1; i < adj_list.size(); ++i) {
 			for (auto &v: adj_list[i]) {
 				if (v.first < 0)
 					throw "Only non-negative weights of edges are allowed";
-				was[v.second] = true;
 			}
 		}
-
-		for (size_t i = 0; i < was.size(); ++i)
-			if (!was[i])
-				throw "Graph isn't connected";
 	}
 
-	PathInfo dijkstra(size_t start_v, PriorityQueueMode mode) {
+	Graph &operator=(const Graph &copy) {
+		adj_list = copy.adj_list;
+
+		return *this;
+	}
+
+	PathInfo dijkstra(size_t start_v, PriorityQueueMode mode) const {
 		std::vector<int> min_cost(adj_list.size());
 		std::vector<int> prev(adj_list.size());
 		std::vector<bool> was(adj_list.size());
@@ -117,27 +115,47 @@ public:
 			throw "Incorrect code for priority queue data structure";
 
 		// Запись всех кратчайших путей и их стоимостей в класс PathInfo
-		PathInfo result(adj_list.size());
+		PathInfo result;
 		for (size_t i = 0; i < adj_list.size(); ++i) {
 			result.paths.push_back({min_cost[i], std::vector<vertex_type>()});
-			for (int curr_v = i; curr_v != -1; curr_v = prev[curr_v])
-				result.paths[i].second.push_back(curr_v);
-			std::reverse(result.paths[i].second.begin(), result.paths[i].second.end());
+			if (min_cost[i] != INT_MAX) {
+				for (int curr_v = i; curr_v != -1; curr_v = prev[curr_v])
+					result.paths[i].second.push_back(curr_v);
+				std::reverse(result.paths[i].second.begin(), result.paths[i].second.end());
+			}
+		}
+
+		// Вывод всех кратчайших путей
+		size_t count = 0;
+		std::cout << "All shortest paths" << std::endl;
+		std::cout << "Initial vertex: " << start_v << std::endl;
+		for (size_t i = 1; i < adj_list.size(); ++i) {
+			if (result.paths[i].second.empty())
+				std::cout << "Vertex " << i << "- inaccessible from vertex " << start_v << '\n';
+			else {
+				std::cout << "Vertex " << i << " - minimal cost: " << result.paths[i].first << ", ";
+				std::cout << "shortest path: ";
+				for (auto &vertex: result.paths[i].second)
+					std::cout << vertex << "->";
+				std::cout << "\b\b  \n";
+			}
 		}
 
 		return result;
 	}
 
-	void print() {
-		std::cout << "Vertices and their neighbours (vertex, cost):" << std::endl;
-
-		size_t curr = 0;
-		for (auto &v: adj_list) {
-			std::cout << "Vertex " << curr << ": ";
-			for (auto &edge: v)
-				std::cout << '(' << edge.second << ',' << edge.first << "), ";
-			std::cout << "\b\b\n";
-		}
+	size_t num_of_vertices() const {
+		return (adj_list.size() - 1); 
 	}
 
+	void print() const {
+		std::cout << "\nVertices and their neighbours (vertex, cost):" << std::endl;
+
+		for (size_t i = 1; i < adj_list.size(); ++i) {
+			std::cout << "Vertex " << i << ": ";
+			for (auto &edge: adj_list[i])
+				std::cout << '(' << edge.second << ',' << edge.first << "), ";
+			std::cout << "\b\b  \n";
+		}
+	}
 };

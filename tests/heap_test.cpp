@@ -33,6 +33,8 @@ TEST(DHeap, can_create_empty_heap_with_custom_comparator) {
 TEST(Binary_DHeap, range_constructor_is_correct) {
 	size_t size = 10;
 	std::vector<int> vec(size);
+	for (auto &elem: vec)
+		elem = gen();
 
 	ASSERT_NO_THROW(
 		BHeapMin<int> heap(vec.begin(), vec.end());
@@ -50,6 +52,8 @@ TEST(Binary_DHeap, range_constructor_is_correct) {
 TEST(Binary_DHeap, vector_constructor_is_correct) {
 	size_t size = 10;
 	std::vector<int> vec(size);
+	for (auto &elem: vec)
+		elem = gen();
 
 	ASSERT_NO_THROW(
 		BHeapMin<int> heap(vec);
@@ -67,7 +71,10 @@ TEST(Binary_DHeap, vector_constructor_is_correct) {
 TEST(Binary_DHeap, push_is_correct) {
 	size_t size = 100;
 	std::vector<int> vec(size);
+	for (auto &elem: vec)
+		elem = gen();
 	BHeapMin<int> heap;
+
 
 	for (size_t i = 0; i < size; ++i) {
 		heap.push(vec[i]);
@@ -85,6 +92,8 @@ TEST(Binary_DHeap, push_is_correct) {
 TEST(Binary_DHeap, front_and_pop_are_correct) {
 	size_t size = 100;
 	std::vector<int> vec(size);
+	for (auto &elem: vec)
+		elem = gen();
 	BHeapMin<int> heap(vec);
 
 	sort(vec.begin(), vec.end());
@@ -103,15 +112,17 @@ TEST(Binary_DHeap, front_and_pop_are_correct) {
 }
 
 template <typename Value>
-using TernaryHeap = DHeap<Value,3>;
+using TernaryHeapMin = DHeap<Value,3>;
 
 TEST(DHeap, range_constructor_is_correct) {
 	size_t size = 100;
 	size_t d = 3;
 	std::vector<int> vec(size);
-
+	for (auto &elem: vec)
+		elem = gen();
+		
 	ASSERT_NO_THROW(
-		TernaryHeap<int> heap(vec.begin(), vec.end());
+		TernaryHeapMin<int> heap(vec.begin(), vec.end());
 		auto heap_vec = heap.get_vector();
 
 		for (size_t i = 0; i < size; ++i) {
@@ -126,9 +137,11 @@ TEST(DHeap, vector_constructor_is_correct) {
 	size_t size = 10;
 	size_t d = 3;
 	std::vector<int> vec(size);
+	for (auto &elem: vec)
+		elem = gen();
 
 	ASSERT_NO_THROW(
-		TernaryHeap<int> heap(vec);
+		TernaryHeapMin<int> heap(vec);
 		auto heap_vec = heap.get_vector();
 
 		for (size_t i = 0; i < size; ++i) {
@@ -143,7 +156,9 @@ TEST(DHeap, push_is_correct) {
 	size_t size = 100;
 	size_t d = 3;
 	std::vector<int> vec(size);
-	BHeapMin<int> heap;
+	for (auto &elem: vec)
+		elem = gen();
+	TernaryHeapMin<int> heap;
 
 	for (size_t i = 0; i < size; ++i) {
 		heap.push(vec[i]);
@@ -161,7 +176,9 @@ TEST(DHeap, front_and_pop_are_correct) {
 	size_t size = 100;
 	size_t d = 3;
 	std::vector<int> vec(size);
-	BHeapMin<int> heap(vec);
+	for (auto &elem: vec)
+		elem = gen();
+	TernaryHeapMin<int> heap(vec);
 
 	sort(vec.begin(), vec.end());
 	for (size_t i = 0; i < size; ++i) {
@@ -169,10 +186,16 @@ TEST(DHeap, front_and_pop_are_correct) {
 
 		heap.pop();
 		auto heap_vec = heap.get_vector();
-		for (size_t j = 0; j < size-i-1; ++j) {
+		for (size_t j = 0; j < size-1-i; ++j) {
 			for (size_t k = 1; k <= d; ++k)
 				if (d*j + k < size-i-1)
 					EXPECT_EQ(heap_vec[j] <= heap_vec[d*j + k], true);
 		}
 	}
+}
+
+TEST(DHeap, size_is_correct) {
+	size_t size = 100;
+	std::vector<int> vec(size);
+	TernaryHeapMin<int> heap(vec);
 }

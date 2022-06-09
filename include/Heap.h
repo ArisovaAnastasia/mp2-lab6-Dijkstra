@@ -6,13 +6,12 @@
 
 template <typename Value, int64_t d, class Pred = std::less<Value>>
 class DHeap {
-private:
 	// Проверка параметра на адекватность
 	static_assert(d > 1, "D-heap with D < 2 is not allowed");
 
-	// ^^^ Поля класса vvv
+	// vvv Поля класса vvv
 	std::vector<Value> arr = std::vector<Value>();
-	Pred cmp;
+	Pred cmp; // компаратор для сравнения элементов отношением '<'
 	// ^^^ Поля класса ^^^
 
 	
@@ -31,7 +30,7 @@ private:
 
 		while (i*d + 1 < size) {
 			min_idx = i;
-			end_idx = std::min(i*d + d, size);
+			end_idx = std::min(i*d + d, size-1);
 
 			for (int curr_idx = i*d; curr_idx <= end_idx; ++curr_idx)
 				if (cmp(arr[curr_idx],arr[min_idx]))
@@ -77,25 +76,25 @@ public:
 		return *this;
 	}
 
-	void push(const Value &value) {
+	inline void push(const Value &value) {
 		arr.push_back(value);
 		_sift_up(arr.size() - 1);
 	}
 
-	void pop() {
+	inline void pop() {
 		std::swap(arr[0], arr.back());
 		arr.pop_back();
 		_sift_down(0);
 	}
 
-	Value front() {
+	inline Value front() {
 		return arr[0];
 	}
 
-	std::vector<Value> get_vector() { return arr; }
-	int64_t size() { return arr.size(); }
-	bool empty() { return arr.empty(); }
-	void clear() { arr.clear(); }
+	inline std::vector<Value> get_vector() { return arr; }
+	inline int64_t size() { return arr.size(); }
+	inline bool empty() { return arr.empty(); }
+	inline void clear() { arr.clear(); }
 };
 
 template <typename Value, typename Pred>
@@ -156,23 +155,23 @@ public:
 	DHeap(const DHeap &copy): arr(copy.arr), cmp(copy.cmp) {}
 	DHeap(DHeap &&mov): arr(std::move(mov.arr)), cmp(mov.cmp) {}
 
-	void push(const Value &value) {
+	inline void push(const Value &value) {
 		arr.push_back(value);
 		_sift_up(arr.size() - 1);
 	}
 
-	void pop() {
+	inline void pop() {
 		std::swap(arr[0], arr.back());
 		arr.pop_back();
 		_sift_down(0);
 	}
 
-	Value front() {
+	inline Value front() {
 		return arr[0];
 	}
 
-	std::vector<Value> get_vector() { return arr; }
-	int64_t size() { return arr.size(); }
-	bool empty() { return arr.empty(); }
-	void clear() { arr.clear(); }
+	inline std::vector<Value> get_vector() { return arr; }
+	inline int64_t size() { return arr.size(); }
+	inline bool empty() { return arr.empty(); }
+	inline void clear() { arr.clear(); }
 };

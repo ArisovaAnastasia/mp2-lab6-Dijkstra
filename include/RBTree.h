@@ -23,10 +23,12 @@ class RBTree {
 			data(value), left(left), right(right), parent(parent), colour(col) {}
 	};
 
-	Pred cmp; // компаратор для сравнения элементов отношением '<'
-	Node *nil = new Node(Value(), Black); // "Фиктивная" листовая вершина и корень дерева
+	// vvv Поля класса vvv
+	Node *nil = new Node(Value(), Black); // "Фиктивная" листовая вершина
 	Node *root;
 	size_t _size = 0;
+	Pred cmp; // компаратор для сравнения элементов отношением '<'
+	// ^^^ Поля класса ^^^
 
 public:
 
@@ -51,8 +53,8 @@ public:
 
 		iterator(const iterator &copy): node(copy.node), prev(copy.prev), nil(copy.nil) {}
 
-		reference operator*() { return node->data; }
-		pointer operator->() { return &(node->data); }
+		inline reference operator*() { return node->data; }
+		inline pointer operator->() { return &(node->data); }
 
 		iterator& operator++() {
 			// Если правое поддерево непусто, заходим в него и идём налево до упора
@@ -91,7 +93,6 @@ public:
 
 			return *this;
 		}
-
 		iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
 
 		iterator& operator--() {
@@ -127,26 +128,24 @@ public:
 
 			return *this;
 		}
+		inline iterator operator--(int) { iterator tmp = *this; --(*this); return tmp; }
 
-		iterator operator--(int) { iterator tmp = *this; --(*this); return tmp; }
-
-
-		iterator& operator=(const iterator &copy) {
+		inline iterator& operator=(const iterator &copy) {
 			node = copy.node;
 			prev = copy.prev;
 
 			return *this;
 		}
 
-		bool operator==(const iterator &it) const {
+		inline bool operator==(const iterator &it) const {
 			return node == it.node;
 		}
-		bool operator!=(const iterator &it) const {
+		inline bool operator!=(const iterator &it) const {
 			return node != it.node;
 		}
 	};
 
-	iterator begin() const {
+	inline iterator begin() const {
 		Node *curr = root;
 
 		while (curr->left != nil)
@@ -155,7 +154,7 @@ public:
 		return iterator(curr, curr->parent, nil);
 	}
 
-	iterator end() const {
+	inline iterator end() const {
 		return iterator(nil, nil, nil);
 	}
 
@@ -173,25 +172,28 @@ public:
 
 		for (auto it = first; it != last; ++it) {
 			insert(*it);
-			++_size;
 		}
 	}
 
 	RBTree(const RBTree &copy): _size(copy._size), cmp(copy.cmp) {
 		nil->parent = nil->left = nil->right = nil;
 
-		_copy_tree(nil, copy.nil);
-		root = nil->right;
+		_copy_tree(copy.nil, nil, copy.nil);
+		root = nil->left;
 	}
 
 	RBTree(RBTree &&mov): _size(mov._size), cmp(std::move(mov.cmp)) {
-		nil->parent = nil;
-		root = nil->right = mov.nil->right;
-		mov.nil->right = mov.nil;
+		std::swap(nil, mov.nil);
+
+		nil->parent = nil->right = nil;
+		root = nil->left;
+
+		mov.root = mov.nil->left = mov.nil;
 	}
 
 	~RBTree() {
 		clear();
+		delete nil;
 	}
 
 	RBTree& operator=(const RBTree &copy) {
@@ -199,10 +201,10 @@ public:
 			_size = copy._size;
 			cmp = copy.cmp;
 
-			if (root != nullptr)
+			if (root != nil)
 				_delete_tree(root);
-			_copy_tree(nil, copy.nil);
-			root = nil->right;
+			_copy_tree(copy.nil, nil, copy.nil);
+			root = nil->left;
 		}
 
 		return *this;
@@ -212,10 +214,10 @@ public:
 		_size = mov._size;
 		cmp = std::move(mov.cmp);
 
-		nil->right = mov.nil->right;
+		std::swap(nil, mov.nil);
 		if (nil != mov.nil)
-			mov.nil->right = nullptr;
-		root = nil->right;
+			mov.root = mov.nil->left = mov.nil;
+		root = nil->left;
 
 		return *this;
 	}
@@ -223,8 +225,10 @@ public:
 	size_t size() { return _size; }
 	bool empty() { return (_size == 0); }
 	void clear() {
-		if (root != nullptr)
+		if (root != nil) {
 			_delete_tree(root);
+			nil->left = root = nil;
+		}
 		_size = 0;
 	}
 
@@ -261,7 +265,7 @@ public:
 		Node *next;
 
 		if (curr == nil) // Дерево пустое
-			next = nil->right = root = new Node(val, Black, nil, nil, nil);
+			next = nil->left = root = new Node(val, Black, nil, nil, nil);
 		else {
 			if (cmp(val, curr->data)) // Вставка слева
 				next = curr->left = new Node(val, Red, nil, nil, curr);
@@ -509,10 +513,10 @@ public:
 			erase_node->parent->right = nil;
 		delete erase_node;
 
-		root = nil->right;
+		root = nil->left;
 	}
 
-	void erase(const Value &val) {
+	inline void erase(const Value &val) {
 		// Проверка наличия вершины в дереве
 		auto it = find(val);
 		if (it.node == nil)
@@ -523,7 +527,7 @@ public:
 
 private:
 
-	void _rotate_left(Node *curr) {
+	inline void _rotate_left(Node *curr) {
 		Node *tmp = curr->right;
 
 		if (tmp->left != nil)
@@ -543,7 +547,7 @@ private:
 			root = tmp;
 	}
 
-	void _rotate_right(Node *curr) {
+	inline void _rotate_right(Node *curr) {
 		Node *tmp = curr->left;
 
 		if (tmp->right != nil)
@@ -564,16 +568,16 @@ private:
 	}
 
 	// Копирование дерева
-	void _copy_tree(Node *old_tree, Node *new_tree) {
-		if (old_tree->left == nil && old_tree->right == nil)
+	void _copy_tree(Node *old_tree, Node *new_tree, Node *old_nil) {
+		if (old_tree->left == old_nil && old_tree->right == old_nil)
 			return;
-		if (old_tree->left != nil) {
+		if (old_tree->left != old_nil) {
 			new_tree->left = new Node(old_tree->left->data, old_tree->left->colour, nil, nil, new_tree);
-			_copy_tree(old_tree->left, new_tree->left);
+			_copy_tree(old_tree->left, new_tree->left, old_nil);
 		}
-		if (old_tree->right != nil) {
+		if (old_tree->right != old_nil) {
 			new_tree->right = new Node(old_tree->right->data, old_tree->right->colour, nil, nil, new_tree);
-			_copy_tree(old_tree->right, new_tree->right);
+			_copy_tree(old_tree->right, new_tree->right, old_nil);
 		}
 	}
 
