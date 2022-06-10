@@ -53,7 +53,7 @@ AdjList generate_random_graph(size_t num_vertices, size_t num_edges, int max_cos
 	for (int i = 0; i < num_edges; ++i) {
 		// Ребро корректно, если вершины не совпадают и такое ребро ещё не существует
 		while (!(v1 != v2 && edge_hash.find(v1*num_vertices + v2) == edge_hash.end()
-				  && edge_hash.find(v2*num_vertices + v1) == edge_hash.end())) {
+						&& edge_hash.find(v2*num_vertices + v1) == edge_hash.end())) {
 			v1 = rand_vertex(gen);
 			v2 = rand_vertex(gen);
 		}
@@ -73,7 +73,7 @@ AdjList enter_user_graph(size_t num_vertices, size_t num_edges) {
 	size_t v1 = 0, v2 = 0;
 	int cost;
 
-	cout << "Enter the edges of graph\n";
+	cout << "\nEnter the edges of graph\n";
 	cout << "Rules:\n";
 	cout << "1) Edges are entered in the format \"v1 v2 cost\" where 'v1' and 'v2' are vertices, 'cost' is edge's cost\n";
 	cout << "2) 'v1', 'v2' are integers with values from [1; number of vertices], 'cost' is a positive integer\n";
@@ -83,7 +83,7 @@ AdjList enter_user_graph(size_t num_vertices, size_t num_edges) {
 	unordered_set<size_t> edge_hash;
 	for (int i = 1; i <= num_edges; ++i) {
 		for (;;) {
-			cout << "Vertex " << i << ": ";
+			cout << "Edge " << i << ": ";
 			try {
 				// Ввод данных
 				cin >> str_v1 >> str_v2 >> str_cost;
@@ -332,7 +332,6 @@ void menu() {
 							graph = Graph(generate_random_graph(num_vertices, num_edges, 20));
 						else
 							graph = Graph(enter_user_graph(num_vertices, num_edges));
-						cout << '\n';
 						graph.print();
 
 						for (;;) {
@@ -347,10 +346,8 @@ void menu() {
 								response = input();
 								if (response == "0")
 									exit();
-								else if (response == "1") {
-									cout << '\n';
+								else if (response == "1")
 									graph.print();
-								}
 								else if (response == "2")
 									apply_dijkstra(graph);
 								else if (response == "3")
