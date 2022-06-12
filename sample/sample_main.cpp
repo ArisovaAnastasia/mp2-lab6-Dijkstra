@@ -3,7 +3,6 @@
 #include "RBTree.h"
 #include "Graph.h"
 #include <chrono>
-#include <random>
 #include <string>
 #include <unordered_set>
 using namespace std;
@@ -16,7 +15,7 @@ inline bool is_empty_string(string str) {
 
 inline string input() {
 	string response,
-		dummy;
+	       dummy;
 	cin >> response;
 	getline(cin, dummy);
 
@@ -33,97 +32,6 @@ inline string input() {
 	}
 
 	return response;
-}
-
-AdjList generate_random_graph(size_t num_vertices, size_t num_edges, int max_cost) {
-	mt19937 gen(random_device{}());
-	uniform_int_distribution<size_t> rand_vertex(1, num_vertices);
-	uniform_int_distribution<int> rand_cost(0, max_cost);
-
-	AdjList adj_list(num_vertices+1);
-	size_t v1 = 0, v2 = 0;
-	int cost;
-
-	++num_vertices;
-	// Однозначность всех рёбер обеспечивается хранением хешей рёбер,
-	// который при фиксированном числе вершин определяется однозначно
-	// для пары рёбер как 'v1 * num_vertices + v2' (v1, v2 - вершины графа)
-	// Граф неориентированный, поэтому также хранится 'v2 * num_vertices + v1'
-	unordered_set<size_t> edge_hash;
-	for (int i = 0; i < num_edges; ++i) {
-		// Ребро корректно, если вершины не совпадают и такое ребро ещё не существует
-		while (!(v1 != v2 && edge_hash.find(v1*num_vertices + v2) == edge_hash.end()
-						&& edge_hash.find(v2*num_vertices + v1) == edge_hash.end())) {
-			v1 = rand_vertex(gen);
-			v2 = rand_vertex(gen);
-		}
-		edge_hash.insert(v1*num_vertices + v2);
-		edge_hash.insert(v2*num_vertices + v1);
-		cost = rand_cost(gen);
-		adj_list[v1].push_back({cost, v2});
-		adj_list[v2].push_back({cost, v1});
-	}
-
-	return adj_list;
-}
-
-AdjList enter_user_graph(size_t num_vertices, size_t num_edges) {
-	AdjList adj_list(num_vertices+1);
-	string str_v1, str_v2, str_cost, dummy;
-	size_t v1 = 0, v2 = 0;
-	int cost;
-
-	cout << "\nEnter the edges of graph\n";
-	cout << "Rules:\n";
-	cout << "1) Edges are entered in the format \"v1 v2 cost\" where 'v1' and 'v2' are vertices, 'cost' is edge's cost\n";
-	cout << "2) 'v1', 'v2' are integers with values from [1; number of vertices], 'cost' is a positive integer\n";
-	cout << "3) Graph is ordinary i.e. it's undirected and it doesn't have loops and multiple edges.\n";
-	cout << "   This is means edge (v1,v2) is the same as (v2,v1), 'v1' != 'v2' and only unique edges are allowed\n";
-
-	unordered_set<size_t> edge_hash;
-	for (int i = 1; i <= num_edges; ++i) {
-		for (;;) {
-			cout << "Edge " << i << ": ";
-			try {
-				// Ввод данных
-				cin >> str_v1 >> str_v2 >> str_cost;
-				getline(cin, dummy);
-
-				// Обработка некорректного ввода
-				if (!is_empty_string(dummy))
-					throw "Incorrect input, try again";
-				try {
-					v1 = stoi(str_v1);
-					v2 = stoi(str_v2);
-					cost = stoi(str_cost);
-				}
-				catch (...) {
-					throw "Incorrect input, try again";
-				}
-				if (v1 < 1 || v2 < 1 || v1 > num_vertices || v2 > num_vertices)
-					throw "Vertex is out of bounds";
-				if (cost < 0)
-					throw "Cost of edge must be non-negative";
-				if (v1 == v2)
-					throw "Loops are not allowed";
-				if (edge_hash.find(v1*(num_vertices + 1) + v2) != edge_hash.end() ||
-					edge_hash.find(v2*(num_vertices + 1) + v1) != edge_hash.end())
-					throw "Multiple edges are not allowed";
-
-				// Вставка ребра в списки смежности
-				edge_hash.insert(v1*(num_vertices + 1) + v2);
-				edge_hash.insert(v2*(num_vertices + 1) + v1);
-				adj_list[v1].push_back({cost, v2});
-				adj_list[v2].push_back({cost, v1});
-				break;
-			}
-			catch (const char *msg) {
-				cout << msg << endl;
-			}
-		}
-	}
-
-	return adj_list;
 }
 
 void enter_num_of_vertices_and_edges(int &num_vertices, int &num_edges) {
@@ -329,9 +237,9 @@ void menu() {
 						Graph graph;
 						// Заполнение графа (1 - пользователем, 2 - случайным образом)
 						if (response == "2")
-							graph = Graph(generate_random_graph(num_vertices, num_edges, 20));
+							graph = generate_random_graph(num_vertices, num_edges, 20);
 						else
-							graph = Graph(enter_user_graph(num_vertices, num_edges));
+							graph = enter_user_graph(num_vertices, num_edges);
 						graph.print();
 
 						for (;;) {
